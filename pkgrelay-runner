@@ -15,7 +15,7 @@ fi
 . $CONF
 
 LOCK=$LOCALDIR/
-lockfile-create $LOCK || exit 0
+lockfile-create --retry 0 $LOCK || exit 0
 lockfile-touch $LOCK &
 LF=$!
 

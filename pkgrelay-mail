@@ -1,0 +1,31 @@
+#!/bin/sh
+set -e
+
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 <config> <changes.file>"
+    exit 1
+fi
+
+. $1
+LOCALFILE="$2"
+
+pkgrelay() {
+    echo "Incoming: $LOCALFILE"
+    echo "Contents: "
+    dcmd $LOCALFILE
+    echo
+    echo "Moving to $REMOTEHOST."
+
+    set -x
+
+    dcmd scp $LOCALFILE $REMOTEHOST
+    dcmd rm -f $LOCALFILE
+}
+
+if OUT=$(pkgrelay "$@" 2>&1); then
+    SUBJ="[$PREFIX] $LOCALFILE -> $REMOTEHOST"
+else
+    SUBJ="[${PREFIX}:FAIL] $LOCALFILE-> $REMOTEHOST"
+fi
+
+echo "$OUT" | mail -a "From: $FROM_MAIL" -s "$SUBJ" $TO_MAIL
